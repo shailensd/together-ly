@@ -2,17 +2,34 @@ import express from 'express';
 import cors from 'cors';
 import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
-
+import { inngest, functions } from './config/inngest.js';
+import { serve } from 'inngest/express';
+import { clerkMiddleware } from './middleware/clerkMiddleware.js';
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
-
+app.use(clerkMiddleware()); // req.auth will be set
+app.use("/api/inngest", serve({ client: inngest, functions }));
 app.get('/', (req, res) => {
     res.send('Hello from the backend server! Also it updates live!');
 });
 
-app.listen(ENV.PORT, () => {
-    console.log(`Server is running on port ${ENV.PORT}`);
-    connectDB();
-});
+const startServer = async () => {
+    try {
+        await connectDB();
+        if (ENV.NODE_ENV !== 'production') {
+            app.listen(ENV.PORT, () => {
+                console.log(`Server is running on port ${ENV.PORT}`);
+            });
+        }
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
+        process.exit(1);
+    }
+};
+
+startServer();
+export default app;
