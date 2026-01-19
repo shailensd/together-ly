@@ -4,7 +4,7 @@ import { ENV } from './config/env.js';
 import { connectDB } from './config/db.js';
 import { inngest, functions } from './config/inngest.js';
 import { serve } from 'inngest/express';
-import { clerkMiddleware } from './middleware/clerkMiddleware.js';
+import { clerkMiddleware } from '@clerk/express';
 
 const app = express();
 
