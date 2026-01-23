@@ -29,40 +29,46 @@ export const useStreamChat = () => {
     // init stream chat client
     // init stream chat client
     useEffect(() => {
-        const initChat = async () => {
-            if (!user || !tokenData?.token) return;
+        if (!tokenData?.token || !user?.id || !STREAM_API_KEY) return;
+
+        const client = StreamChat.getInstance(STREAM_API_KEY);
+        let cancelled = false;
+
+        const connect = async () => {
             try {
-                const client = StreamChat.getInstance(STREAM_API_KEY);
                 await client.connectUser(
                     {
                         id: user.id,
-                        name: user.fullName,
-                        image: user.imageUrl,
+                        name:
+                            user.fullName ?? user.username ?? user.primaryEmailAddress?.emailAddress ?? user.id,
+                        image: user.imageUrl ?? undefined,
                     },
+                    tokenData.token
                 );
-                setChatClient(client);
+                if (!cancelled) {
+                    setChatClient(client);
+                }
             } catch (error) {
-                console.log("Error connecting Stream chat user:", error);
+                console.log("Error connecting to stream", error);
                 Sentry.captureException(error, {
                     tags: { component: "useStreamChat" },
                     extra: {
                         context: "stream_chat_connection",
                         userId: user?.id,
-                        streanApiKey: STREAM_API_KEY ? "present" : "missing",
+                        streamApiKey: STREAM_API_KEY ? "present" : "missing",
                     },
                 });
             }
         };
 
-        initChat();
+        connect();
 
+        // cleanup
         return () => {
-            if (chatClient) {
-                chatClient.disconnectUser();
-            }
+            cancelled = true;
+            client.disconnectUser();
         };
-    }, [tokenData, user, chatClient]);
+    }, [tokenData?.token, user?.id]);
 
-    return { chatClient, isLoading: tokenLoading, error: tokenError };
+    return { chatClient, isLoading, error };
 };
-
