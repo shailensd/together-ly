@@ -12,8 +12,8 @@ import * as Sentry from "@sentry/node";
 
 const app = express();
 
-app.use(cors());
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(clerkMiddleware()); // req.auth will be set
 
 app.get("/debug-sentry", function mainHandler(req, res) {
