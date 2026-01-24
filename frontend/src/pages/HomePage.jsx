@@ -1,9 +1,9 @@
-import { useSearchParams } from "react-router";
-import { useState } from "react";
-import { useStreamChat } from "../hooks/useStreamChat.js";
-import PageLoader from "../components/PageLoader.jsx";
-import "../styles/stream-chat-theme.css";
 import { UserButton } from "@clerk/clerk-react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
+import { useStreamChat } from "../hooks/useStreamChat";
+import PageLoader from "../components/PageLoader";
+
 import {
     Chat,
     Channel,
@@ -13,33 +13,35 @@ import {
     Thread,
     Window,
 } from "stream-chat-react";
-import { PlusIcon } from "lucide-react";
-import CreateChannelModal from "../components/CreateChannelModal.jsx";
+
+import "../styles/stream-chat-theme.css";
+import { HashIcon, PlusIcon, UsersIcon } from "lucide-react";
+import CreateChannelModal from "../components/CreateChannelModal";
+import CustomChannelPreview from "../components/CustomChannelPreview";
+import UsersList from "../components/UsersList";
+import CustomChannelHeader from "../components/CustomChannelHeader";
 
 const HomePage = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [activeChannel, setActiveChannel] = useState(null);
-    const [searchParam, setSearchParam] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const { chatClient, error, isLoading } = useStreamChat();
 
-    // set active channel from url param
-    useState(() => {
+    // set active channel from URL params
+    useEffect(() => {
         if (chatClient) {
-            const channelId = searchParam.get("channel");
+            const channelId = searchParams.get("channel");
             if (channelId) {
                 const channel = chatClient.channel("messaging", channelId);
                 setActiveChannel(channel);
             }
         }
-    }, [chatClient, searchParam]);
+    }, [chatClient, searchParams]);
 
-    if (error) {
-        return <div>Error loading chat: {error.message}</div>;
-    }
-    if (isLoading || !chatClient) {
-        return <PageLoader />;
-    }
+    // todo: handle this with a better component
+    if (error) return <p>Something went wrong...</p>;
+    if (isLoading || !chatClient) return <PageLoader />;
 
     return (
         <div className="chat-wrapper">
@@ -58,7 +60,6 @@ const HomePage = () => {
                                     <UserButton />
                                 </div>
                             </div>
-
                             {/* CHANNELS LIST */}
                             <div className="team-channel-list__content">
                                 <div className="create-channel-section">
@@ -67,14 +68,52 @@ const HomePage = () => {
                                         <span>Create Channel</span>
                                     </button>
                                 </div>
+
+                                {/* CHANNEL LIST */}
+                                <ChannelList
+                                    filters={{ members: { $in: [chatClient?.user?.id] } }}
+                                    options={{ state: true, watch: true }}
+                                    Preview={({ channel }) => (
+                                        <CustomChannelPreview
+                                            channel={channel}
+                                            activeChannel={activeChannel}
+                                            setActiveChannel={(channel) => setSearchParams({ channel: channel.id })}
+                                        />
+                                    )}
+                                    List={({ children, loading, error }) => (
+                                        <div className="channel-sections">
+                                            <div className="section-header">
+                                                <div className="section-title">
+                                                    <HashIcon className="size-4" />
+                                                    <span>Channels</span>
+                                                </div>
+                                            </div>
+
+                                            {/* todos: add better components here instead of just a simple text  */}
+                                            {loading && <div className="loading-message">Loading channels...</div>}
+                                            {error && <div className="error-message">Error loading channels</div>}
+
+                                            <div className="channels-list">{children}</div>
+
+                                            <div className="section-header direct-messages">
+                                                <div className="section-title">
+                                                    <UsersIcon className="size-4" />
+                                                    <span>Direct Messages</span>
+                                                </div>
+                                            </div>
+                                            <UsersList activeChannel={activeChannel} />
+                                        </div>
+                                    )}
+                                />
                             </div>
                         </div>
                     </div>
+
                     {/* RIGHT CONTAINER */}
                     <div className="chat-main">
                         <Channel channel={activeChannel}>
                             <Window>
-                                {/* <CustomChannelHeader /> */}
+                                <CustomChannelHeader />
                                 <MessageList />
                                 <MessageInput />
                             </Window>
@@ -85,10 +124,8 @@ const HomePage = () => {
                 </div>
 
                 {isCreateModalOpen && <CreateChannelModal onClose={() => setIsCreateModalOpen(false)} />}
-
-            </Chat >
-        </div >
+            </Chat>
+        </div>
     );
 };
-
 export default HomePage;
