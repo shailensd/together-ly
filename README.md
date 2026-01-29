@@ -69,10 +69,11 @@ Create a `.env` file in the `backend` directory:
 PORT=5000
 NODE_ENV=development
 
-# MongoDB
+# MongoDB (use one of the following)
+# For local MongoDB:
 MONGODB_URI=mongodb://localhost:27017/togetherly
-# or for MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/togetherly
+# For MongoDB Atlas, use your connection string from Atlas dashboard:
+# MONGODB_URI=mongodb+srv://<YOUR_USERNAME>:<YOUR_PASSWORD>@<YOUR_CLUSTER>.mongodb.net/togetherly
 
 # Clerk
 CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
