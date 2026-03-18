@@ -14,7 +14,7 @@ const AuthPage = () => {
                     <h1 className="hero-title">Teamwork, Simplified ✨</h1>
 
                     <p className="hero-subtitle">
-                        Empower your team with secure, real-time communication 💬
+                        Empower your team with secure, real-time communication 🗣️
                     </p>
 
                     <div className="features-list">
