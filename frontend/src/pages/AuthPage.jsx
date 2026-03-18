@@ -11,10 +11,10 @@ const AuthPage = () => {
                         <span className="brand-name">Togetherly</span>
                     </div>
 
-                    <h1 className="hero-title">Teamwork, simplified ✨</h1>
+                    <h1 className="hero-title">Teamwork, Simplified ✨</h1>
 
                     <p className="hero-subtitle">
-                        Empower your team with secure, real-time communication. Streamline collaboration with powerful features designed for modern workforces
+                        Empower your team with secure, real-time communication 💬
                     </p>
 
                     <div className="features-list">
