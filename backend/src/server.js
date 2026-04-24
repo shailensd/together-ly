@@ -23,7 +23,12 @@ app.get("/debug-sentry", function mainHandler(req, res) {
 app.get('/', (req, res) => {
     res.send('Hello from the backend server! Also it updates live!');
 });
-app.use("/api/inngest", serve({ client: inngest, functions }));
+// Security: explicitly restrict Inngest serve to only the required HTTP methods.
+// PATCH, OPTIONS, and DELETE must never reach the serve handler (CVE disclosed 2026-04).
+const inngestHandler = serve({ client: inngest, functions });
+app.get("/api/inngest", inngestHandler);
+app.post("/api/inngest", inngestHandler);
+app.put("/api/inngest", inngestHandler);
 app.use("/api/chat", chatRoutes);
 
 Sentry.setupExpressErrorHandler(app);
